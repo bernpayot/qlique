@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import FeatureCard from "../components/Featurecard";
+import FeatureCard from "../components/FeatureCard";
 import Logo from "../assets/qliqueLogo.png";
 import WhiteLogo from "../assets/whiteLogo.png";
 import Logo1 from "../assets/material-symbols_book.png";
