@@ -10,10 +10,17 @@ import Logo4 from "../assets/ic_baseline-queue (1).png";
 import Logo5 from "../assets/material-symbols_reviews.png";
 import Logo6 from "../assets/mingcute_calendar-fill.png";
 import phone from "../assets/Rectangle 7104.png";
+import { useAuth } from '../context/AuthContext';
 
 export default function LandingPage() {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const { user, logout, isAuthenticated } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/');
+  };
 
   return (
     <div className="font-sans text-gray-800">
@@ -35,7 +42,7 @@ export default function LandingPage() {
         </button>
 
         {/* Desktop Nav */}
-        <nav className="hidden justify-center md:flex space-x-10 text-gray-700">
+        <nav aria-label="Main Navigation" className="hidden justify-center md:flex space-x-10 text-gray-700">
           <a href="#features" className="poppins font-semibold text-black hover:text-teal-600">Features</a>
           <a href="#" className="poppins font-semibold text-black hover:text-teal-600">How It Works</a>
           <a href="#" className="poppins font-semibold text-black hover:text-teal-600">Pricing</a>
@@ -43,16 +50,34 @@ export default function LandingPage() {
 
         {/* Desktop Buttons */}
         <div className="hidden md:flex space-x-4">
-          <button
-            className="poppins font-medium px-4 py-2 border rounded-lg hover:bg-gray-100"
-            onClick={() => navigate("/signin")}
-          >
-            Log in
-          </button>
-            <button 
-            className="poppins font-semibold px-4 py-2 bg-[#024E44] text-white rounded-lg hover:bg-[#023C34]"
-            onClick={() => navigate("/signup")}>Get Started</button>
-
+          {isAuthenticated ? (
+            <>
+              <span className="poppins font-medium px-4 py-2 text-gray-700">
+                Welcome, {user?.name || 'User'}!
+              </span>
+              <button
+                className="poppins font-medium px-4 py-2 border rounded-lg hover:bg-gray-100"
+                onClick={handleLogout}
+              >
+                Log out
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                className="poppins font-medium px-4 py-2 border rounded-lg hover:bg-gray-100"
+                onClick={() => navigate("/signin")}
+              >
+                Log in
+              </button>
+              <button 
+                className="poppins font-semibold px-4 py-2 bg-[#024E44] text-white rounded-lg hover:bg-[#023C34]"
+                onClick={() => navigate("/signup")}
+              >
+                Get Started
+              </button>
+            </>
+          )}
         </div>
 
     {/* Mobile Dropdown */}

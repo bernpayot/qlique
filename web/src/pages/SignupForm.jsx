@@ -1,17 +1,76 @@
 import React, { useState } from 'react';
-import { Link } from "react-router-dom"; 
+import { Link, useNavigate } from "react-router-dom"; 
 import Logo from "../assets/qliqueLogo.png";
 import EyeIcon from "../assets/hide.png";
 
 const SignupForm = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [formData, setFormData] = useState({ name: '', email: '', password: '' });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  
+  const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+    
+    if (!formData.name || !formData.email || !formData.password) {
+      setError('Please fill in all fields');
+      return;
+    }
+
+    if (formData.password.length < 8) {
+      setError('Password must be at least 8 characters long');
+      return;
+    }
+
+    setIsLoading(true);
+    
+    try {
+      const response = await fetch('http://localhost:3000/api/v1/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSuccess('Account created successfully! Redirecting...');
+        // Wait a moment to show success message, then redirect
+        setTimeout(() => {
+          navigate('/signin');
+        }, 1500);
+      } else {
+        setError(data.message || 'Registration failed');
+      }
+    } catch (err) {
+      setError('Network error. Please try again.');
+      console.error('Registration error:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="relative min-h-screen bg-white px-4 pt-16">
-    <Link to="/" className="absolute top-6 left-6 flex items-center space-x-2">
-    <img src={Logo} alt="Qlique Logo" className="h-10 w-auto" />
-    <span className="gilroy text-2xl font-bold text-[#024E44]">Qlique</span>
-    </Link>
+      <Link to="/" className="absolute top-6 left-6 flex items-center space-x-2">
+        <img src={Logo} alt="Qlique Logo" className="h-10 w-auto" />
+        <span className="gilroy text-2xl font-bold text-[#024E44]">Qlique</span>
+      </Link>
 
       {/* Centered form */}
       <div className="flex items-center justify-center">
@@ -19,12 +78,26 @@ const SignupForm = () => {
           <h2 className="poppins text-2xl font-semibold text-center text-black">Create an account</h2>
           <p className="poppins text-center mb-8 text-sm text-black">
             Already have an account?{' '}
-            <a href="/login" className="poppins text-black undeline hover:underline">
+            <Link to="/signin" className="poppins text-black underline hover:underline">
               Log in
-            </a>
+            </Link>
           </p>
 
-          <form className="space-y-6">
+          {/* Error Message */}
+          {error && (
+            <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+              {error}
+            </div>
+          )}
+
+          {/* Success Message */}
+          {success && (
+            <div className="p-3 bg-green-100 border border-green-400 text-green-700 rounded">
+              {success}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-6">
             {/* Name */}
             <div>
               <label htmlFor="name" className="poppins block text-sm font-medium text-[#666666]">
@@ -32,51 +105,62 @@ const SignupForm = () => {
               </label>
               <input
                 id="name"
+                name="name"
                 type="text"
+                value={formData.name}
+                onChange={handleChange}
                 placeholder="Enter your profile name"
                 className="poppins mt-1 w-full text-sm px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-600"
+                required
               />
             </div>
 
             {/* Email */}
             <div>
               <label htmlFor="email" className="poppins block text-sm font-medium text-[#666666]">
-                What’s your email?
+                What's your email?
               </label>
               <input
                 id="email"
+                name="email"
                 type="email"
+                value={formData.email}
+                onChange={handleChange}
                 placeholder="Enter your email address"
                 className="poppins text-sm mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-600"
+                required
               />
             </div>
 
             {/* Password */}
             <div>
-            <div className="flex justify-between items-center mb-1">
-                 <label htmlFor="password" className="poppins block text-sm font-medium text-[#666666]">
-                     Create a password
-                     </label>
-                 <button
-                    type="button"
-                     onClick={() => setPasswordVisible(!passwordVisible)}
-                    className="flex items-center text-xs text-gray-600 hover:text-gray-800">
-                <img src={EyeIcon} alt="Toggle password visibility" className="h-5 w-5" />
-                <span className="poppins ml-1">{passwordVisible ? "Hide" : "Show"}</span>
+              <div className="flex justify-between items-center mb-1">
+                <label htmlFor="password" className="poppins block text-sm font-medium text-[#666666]">
+                  Create a password
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setPasswordVisible(!passwordVisible)}
+                  className="flex items-center text-xs text-gray-600 hover:text-gray-800"
+                >
+                  <img src={EyeIcon} alt="Toggle password visibility" className="h-5 w-5" />
+                  <span className="poppins ml-1">{passwordVisible ? "Hide" : "Show"}</span>
                 </button>
-            </div>
-            <input
+              </div>
+              <input
                 id="password"
+                name="password"
                 type={passwordVisible ? 'text' : 'password'}
+                value={formData.password}
+                onChange={handleChange}
                 placeholder="Enter your password"
                 className="poppins text-sm w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-600"
-            />
-
-            <p className="poppins text-xs text-gray-500 mt-1">
+                required
+              />
+              <p className="poppins text-xs text-gray-500 mt-1">
                 Use 8 or more characters with a mix of letters, numbers & symbols
-            </p>
+              </p>
             </div>
-
 
             {/* Terms */}
             <p className="poppins text-xs text-black">
@@ -88,9 +172,10 @@ const SignupForm = () => {
             {/* Signup Button */}
             <button
               type="submit"
-              className="poppins w-full bg-[#024E44] text-white py-2 px-4 rounded-full hover:bg-green-900 transition"
+              disabled={isLoading}
+              className="poppins w-full bg-[#024E44] text-white py-2 px-4 rounded-full hover:bg-green-900 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Create an account
+              {isLoading ? 'Creating account...' : 'Create an account'}
             </button>
           </form>
         </div>

@@ -35,11 +35,7 @@ export const authController = {
                     message: 'User creation failed'
                 });
             }
-
-            if (insertError) {
-                return handleSupabaseError(insertError, 'Insert user', res);
-            }            
-
+            
             const safeUser = {
                 id: data.user.id,
                 email: data.user.email,

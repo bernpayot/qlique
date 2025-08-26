@@ -1,10 +1,56 @@
 import React, { useState } from 'react';
-import { Link } from "react-router-dom"; 
+import { Link, useNavigate } from "react-router-dom"; 
+import { useAuth } from '../context/AuthContext';
 import Logo from "../assets/qliqueLogo.png";
 import EyeIcon from "../assets/hide.png";
 
 const SignInForm = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState({});
+  
+  const { login, error: authError } = useAuth();
+  const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    // Clear field-specific error
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    if (!formData.email) newErrors.email = 'Email is required';
+    if (!formData.password) newErrors.password = 'Password is required';
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!validateForm()) return;
+    
+    setIsLoading(true);
+    try {
+      const result = await login(formData.email, formData.password);
+      if (result.success) {
+        navigate('/'); // Redirect to home after successful login
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="h-screen flex flex-col justify-between items-center bg-white px-4 py-4">
@@ -18,7 +64,13 @@ const SignInForm = () => {
         <div className="w-full bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
           <h2 className="poppins text-2xl font-semibold text-center mb-6">Sign in</h2>
 
-          <form className="space-y-4">
+          {authError && (
+            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+              {authError}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email */}
             <div>
               <label htmlFor="email" className="poppins block text-sm text-[#666666] mb-1">
@@ -26,10 +78,15 @@ const SignInForm = () => {
               </label>
               <input
                 id="email"
-                type="text"
-                placeholder=""
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-600"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-600 ${
+                  errors.email ? 'border-red-500' : 'border-gray-300'
+                }`}
               />
+              {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
             </div>
 
             {/* Password */}
@@ -50,17 +107,24 @@ const SignInForm = () => {
 
               <input
                 id="password"
+                name="password"
                 type={passwordVisible ? "text" : "password"}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-600"
+                value={formData.password}
+                onChange={handleChange}
+                className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-600 ${
+                  errors.password ? 'border-red-500' : 'border-gray-300'
+                }`}
               />
+              {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
             </div>
 
             {/* Login Button */}
             <button
               type="submit"
-              className="poppins w-full bg-[#024E44] text-white py-2 px-4 rounded-full hover:bg-green-900 transition"
+              disabled={isLoading}
+              className="poppins w-full bg-[#024E44] text-white py-2 px-4 rounded-full hover:bg-green-900 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Log in
+              {isLoading ? 'Signing in...' : 'Log in'}
             </button>
 
             {/* Terms */}
@@ -86,9 +150,9 @@ const SignInForm = () => {
         </div>
 
         {/* Create account */}
-        <button className="poppins w-full border border-gray-400 text-gray-800 py-2 px-4 rounded-full hover:bg-gray-100 transition">
+        <Link to="/signup" className="poppins w-full border border-gray-400 text-gray-800 py-2 px-4 rounded-full hover:bg-gray-100 transition text-center">
           Create an account
-        </button>
+        </Link>
       </div>
 
       {/* Footer */}
