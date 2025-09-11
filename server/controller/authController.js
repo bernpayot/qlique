@@ -161,6 +161,5 @@ export const authController = {
         } catch (error) {
             return handleGenericError(error, 'Get current user', res);
         }
-    }
-    
+    } 
 }
