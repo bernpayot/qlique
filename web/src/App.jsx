@@ -5,6 +5,8 @@ import SignInForm from "./pages/SignInForm";
 import AdminBooking from "./pages/AdminBooking";
 import AdminLayout from "./pages/AdminLayout";
 import AdminStylists from "./pages/AdminStylists";
+import AdminNotificationSettings from "./pages/AdminNotificationSettings";
+import AdminFeedback from "./pages/AdminFeedback";
 
 
 export default function App() {
@@ -22,8 +24,8 @@ export default function App() {
       <Route path="clients" element={<h1>Clients Page</h1>} />
       <Route path="stylists" element={<AdminStylists />} />
       <Route path="analytics" element={<h1>Admin Analytics</h1>} />
-      <Route path="notifications" element={<h1>Notifications</h1>} />
-      <Route path="feedbacks" element={<h1>Feedbacks</h1>} />
+      <Route path="notifications" element={<AdminNotificationSettings />}  />
+      <Route path="feedbacks" element={<AdminFeedback />} />
       </Route>
     </Routes>
   );

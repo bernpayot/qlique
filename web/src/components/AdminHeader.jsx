@@ -6,7 +6,9 @@ const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <header className="w-full flex items-center justify-end bg-white px-6 py-3 shadow relative">
+    <header className="w-full flex items-center justify-between bg-white px-6 py-3 shadow relative">
+      <div className="poppins text-lg font-semibold text-gray-800">Admin Dashboard</div>
+
       {/* Desktop Right: Icons + Avatar */}
       <div className="hidden md:flex items-center space-x-4">
         <button className="p-2 rounded-full hover:bg-gray-100">
@@ -23,6 +25,7 @@ const Header = () => {
         />
       </div>
 
+      {/* Mobile Menu Button */}
       <button
         className="md:hidden p-2 rounded-full hover:bg-gray-100"
         onClick={() => setMenuOpen(true)}
