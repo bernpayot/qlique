@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import FeatureCard from "../components/Featurecard";
 import Logo from "../assets/qliqueLogo.png";
 import WhiteLogo from "../assets/whiteLogo.png";
@@ -52,9 +52,8 @@ export default function LandingPage() {
             <button 
             className="poppins font-semibold px-4 py-2 bg-[#024E44] text-white rounded-lg hover:bg-[#023C34]"
             onClick={() => navigate("/signup")}>Get Started</button>
-
         </div>
-
+        
     {/* Mobile Dropdown */}
     {menuOpen && (
     <div className="md:hidden absolute top-16 left-0 w-full bg-white shadow-lg flex flex-col items-center py-6 space-y-4 z-50">
@@ -89,9 +88,11 @@ export default function LandingPage() {
               <button className="bg-pink-500 text-white px-5 py-2 rounded-full font-semibold hover:bg-pink-600 transition">
                 Book Now
               </button>
-              <button className="border border-white px-5 py-2 rounded-full text-white hover:bg-white hover:text-teal-800 transition">
-                Learn More
-              </button>
+              <Link to="/admin/bookings">
+            <button className="border border-white px-5 py-2 rounded-full text-white hover:bg-white hover:text-teal-800 transition">
+              Learn More
+            </button>
+          </Link>
             </div>
           </div>
         </div>
@@ -132,16 +133,16 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Footer */}
-<footer className="bg-black text-gray-300 py-12 px-8">
-  <div className="max-w-6xl mx-auto grid md:grid-cols-4 gap-8">
-    <div>
-      <div className="flex items-center gap-2 mb-3">
-        <img src={WhiteLogo} alt="Qlique Logo" className="w-8 h-8" />
-        <h4 className="text-xl font-bold text-white">Qlique</h4>
-      </div>
-      <p>Making salon visits smarter, faster, and more personalized.</p>
-    </div>
+          {/* Footer */}
+    <footer className="bg-black text-gray-300 py-12 px-8">
+      <div className="max-w-6xl mx-auto grid md:grid-cols-4 gap-8">
+        <div>
+          <div className="flex items-center gap-2 mb-3">
+            <img src={WhiteLogo} alt="Qlique Logo" className="w-8 h-8" />
+            <h4 className="text-xl font-bold text-white">Qlique</h4>
+          </div>
+          <p>Making salon visits smarter, faster, and more personalized.</p>
+        </div>
     
     <div>
       <h5 className="font-semibold text-white mb-3">Product</h5>
