@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from "react-router-dom"; 
+import { useAuth } from '../context/AuthContext';
 import Logo from "../assets/qliqueLogo.png";
 import EyeIcon from "../assets/hide.png";
 
@@ -9,7 +10,9 @@ const SignupForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
   
+  const { register, error: authError } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -24,6 +27,7 @@ const SignupForm = () => {
     e.preventDefault();
     setError('');
     setSuccess('');
+    setFieldErrors({});
     
     if (!formData.name || !formData.email || !formData.password) {
       setError('Please fill in all fields');
@@ -38,28 +42,21 @@ const SignupForm = () => {
     setIsLoading(true);
     
     try {
-      const response = await fetch('http://localhost:3000/api/v1/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
+      const result = await register(formData);
+      if (result.success) {
         setSuccess('Account created successfully! Redirecting...');
-        // Wait a moment to show success message, then redirect
         setTimeout(() => {
-          navigate('/signin');
+          navigate('/');
         }, 1500);
       } else {
-        setError(data.message || 'Registration failed');
+        // Handle registration failure
+        if (result.error) {
+          setError(result.error);
+        }
       }
-    } catch (err) {
-      setError('Network error. Please try again.');
-      console.error('Registration error:', err);
+    } catch (error) {
+      setError('Registration failed. Please try again.');
+      console.error('Registration error:', error);
     } finally {
       setIsLoading(false);
     }
@@ -84,9 +81,9 @@ const SignupForm = () => {
           </p>
 
           {/* Error Message */}
-          {error && (
+          {(error || authError) && (
             <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-              {error}
+              {error || authError}
             </div>
           )}
 
@@ -113,6 +110,9 @@ const SignupForm = () => {
                 className="poppins mt-1 w-full text-sm px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-600"
                 required
               />
+              {fieldErrors.name?.[0] && (
+                <p className="poppins text-xs text-red-600 mt-1">{fieldErrors.name[0]}</p>
+              )}
             </div>
 
             {/* Email */}
@@ -130,6 +130,9 @@ const SignupForm = () => {
                 className="poppins text-sm mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-600"
                 required
               />
+              {fieldErrors.email?.[0] && (
+                <p className="poppins text-xs text-red-600 mt-1">{fieldErrors.email[0]}</p>
+              )}
             </div>
 
             {/* Password */}
@@ -157,6 +160,9 @@ const SignupForm = () => {
                 className="poppins text-sm w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-600"
                 required
               />
+              {fieldErrors.password?.[0] && (
+                <p className="poppins text-xs text-red-600 mt-1">{fieldErrors.password[0]}</p>
+              )}
               <p className="poppins text-xs text-gray-500 mt-1">
                 Use 8 or more characters with a mix of letters, numbers & symbols
               </p>

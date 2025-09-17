@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { apiService } from '../services/api';
+import { jwtDecode } from 'jwt-decode';
 
 const AuthContext = createContext();
 
@@ -13,6 +14,7 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
+    const [claims, setClaims] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -24,11 +26,13 @@ export const AuthProvider = ({ children }) => {
         try {
             const token = localStorage.getItem('accessToken');
             if (token) {
+                setClaims(jwtDecode(token));
                 const response = await apiService.getCurrentUser();
                 setUser(response.user);
             }
         } catch (error) {
             localStorage.removeItem('accessToken');
+            setClaims(null);
         } finally {
             setLoading(false);
         }
@@ -41,6 +45,7 @@ export const AuthProvider = ({ children }) => {
 
             localStorage.setItem('accessToken', response.session.access_token);
             setUser(response.user);
+            setClaims(jwtDecode(response.session.access_token));
 
             return { success: true };
         } catch (error) {
@@ -58,7 +63,7 @@ export const AuthProvider = ({ children }) => {
             return loginResult;
         } catch (error) {
             setError(error.message);
-            return { sucess: false, error: error.message };
+            return { success: false, error: error.message };
         }
     };
 
@@ -70,11 +75,13 @@ export const AuthProvider = ({ children }) => {
         } finally {
             localStorage.removeItem('accessToken');
             setUser(null);
+            setClaims(null);
         }
     };
 
     const value = {
         user,
+        claims,
         loading,
         error,
         login,

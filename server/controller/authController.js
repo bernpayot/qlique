@@ -15,13 +15,13 @@ export const authController = {
     async register(req, res) {
         try {
             const validatedData = registerSchema.parse(req.body);
-            const { email, password, name, phone, role } = validatedData;
+            const { email, password, name } = validatedData;
 
             const { data, error } = await supabase.auth.signUp({
                 email,
                 password,
                 options: {
-                    data: { name, phone, role }
+                    data: { name }
                 }
             });
 
@@ -41,8 +41,6 @@ export const authController = {
                 email: data.user.email,
                 email_confirmed_at: data.user.email_confirmed_at,
                 name: data.user.user_metadata?.name || null,
-                phone: data.user.user_metadata?.phone || null,
-                role: data.user.user_metadata?.role || null
             };
 
             return res.status(201).json({
@@ -83,8 +81,6 @@ export const authController = {
                 id: data.user.id,
                 email: data.user.email,
                 name: data.user.user_metadata?.name || null,
-                phone: data.user.user_metadata?.phone || null,
-                role: data.user.user_metadata?.role || null
             }
 
             res.json({
@@ -150,8 +146,6 @@ export const authController = {
                 email: user.email,
                 email_confirmed_at: user.email_confirmed_at,
                 name: user.user_metadata?.name || null,
-                phone: user.user_metadata?.phone || null,
-                role: user.user_metadata?.role || null
             };
 
             return res.json({

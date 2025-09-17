@@ -1,3 +1,5 @@
+// Removed unused import from 'zod'
+
 export const handleSupabaseError = (error, operation, res) => {
     console.error(`${operation} error:`, error);
     
@@ -56,38 +58,22 @@ export const handleAuthError = (error, operation, res) => {
 export const handleValidationError = (error, res) => {
     console.error('Validation error:', error);
     
-    // Check if error.errors exists and is an array (Zod error structure)
-    if (error.errors && Array.isArray(error.errors)) {
+    // ZodError -> stable shape via flatten()
+    if (typeof error?.flatten === 'function') {
+        const { fieldErrors, formErrors} = error.flatten();
         return res.status(400).json({
             success: false,
             message: 'Validation failed',
-            errors: error.errors.map(err => ({
-                field: err.path && Array.isArray(err.path) ? err.path.join('.') : 'unknown',
-                message: err.message || 'Validation error'
-            }))
+            errors: fieldErrors,
+            formErrors
         });
     }
-    
-    // Check if it's a Zod error with issues property (alternative structure)
-    if (error.issues && Array.isArray(error.issues)) {
-        return res.status(400).json({
-            success: false,
-            message: 'Validation failed',
-            errors: error.issues.map(issue => ({
-                field: issue.path && Array.isArray(issue.path) ? issue.path.join('.') : 'unknown',
-                message: issue.message || 'Validation error'
-            }))
-        });
-    }
-    
+
     // Fallback for cases where error structure is unknown
     return res.status(400).json({
         success: false,
         message: 'Validation failed',
-        errors: [{
-            field: 'unknown',
-            message: error.message || 'Validation error'
-        }]
+        errors: { _errors: [error?.message || 'Validation error'] }
     });
 };
 
